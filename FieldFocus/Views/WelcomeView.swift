@@ -1,0 +1,208 @@
+import SwiftUI
+
+/// Home / Guide screen — mirrors the "Welcome to FieldFocus" Stitch screen.
+struct WelcomeView: View {
+    @EnvironmentObject var locationService: LocationService
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var advisorService: PhotographyAdvisorService
+
+    @State private var showLocationSearch = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack(alignment: .top) {
+                FieldFocusTheme.Color.background.ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    headerBar
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: FieldFocusTheme.Spacing.md) {
+                            heroCard
+                            statusGrid
+                            locationButton
+                        }
+                        .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
+                        .padding(.vertical, FieldFocusTheme.Spacing.md)
+                    }
+                }
+            }
+            .navigationBarHidden(true)
+            .sheet(isPresented: $showLocationSearch) {
+                LocationSearchView()
+            }
+        }
+    }
+
+    // MARK: - Header
+    private var headerBar: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("FieldFocus")
+                    .font(FieldFocusTheme.Typography.headlineMD())
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+                Text("PROFESSIONAL FIELD ASSISTANT")
+                    .font(FieldFocusTheme.Typography.labelCaps())
+                    .foregroundColor(.white.opacity(0.7))
+                    .kerning(1)
+            }
+            Spacer()
+            Image(systemName: "person.crop.circle")
+                .font(.system(size: 28))
+                .foregroundColor(.white.opacity(0.85))
+        }
+        .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
+        .padding(.vertical, FieldFocusTheme.Spacing.md)
+        .background(FieldFocusTheme.Color.navyDark)
+    }
+
+    // MARK: - Hero card
+    private var heroCard: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.lg)
+                .fill(
+                    LinearGradient(
+                        colors: [FieldFocusTheme.Color.navyMid, FieldFocusTheme.Color.navyDark],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(height: 200)
+
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    conditionChip
+                    Text(weatherService.snapshot.locationName)
+                        .font(FieldFocusTheme.Typography.headlineSM())
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Image(systemName: weatherService.snapshot.condition.systemIcon)
+                    .font(.system(size: 56))
+                    .foregroundColor(FieldFocusTheme.Color.orange)
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .padding(FieldFocusTheme.Spacing.md)
+        }
+    }
+
+    private var conditionChip: some View {
+        HStack(spacing: 4) {
+            Image(systemName: weatherService.snapshot.condition.systemIcon)
+                .font(.system(size: 12))
+            Text(weatherService.snapshot.condition.rawValue.uppercased())
+                .font(FieldFocusTheme.Typography.labelCaps())
+        }
+        .foregroundColor(FieldFocusTheme.Color.navyDark)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(FieldFocusTheme.Color.orange)
+        .clipShape(Capsule())
+    }
+
+    // MARK: - Status grid
+    private var statusGrid: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: FieldFocusTheme.Spacing.sm) {
+            StatusCard(
+                icon: "sun.horizon.fill",
+                label: "GOLDEN HOUR",
+                value: goldenHourText,
+                tint: FieldFocusTheme.Color.orange
+            )
+            StatusCard(
+                icon: weatherService.snapshot.condition.systemIcon,
+                label: "CONDITIONS",
+                value: weatherService.snapshot.condition.rawValue.uppercased(),
+                tint: FieldFocusTheme.Color.navyDark
+            )
+            StatusCard(
+                icon: "thermometer.medium",
+                label: "COLOR TEMP",
+                value: "\(weatherService.snapshot.temperatureKelvin)K",
+                tint: FieldFocusTheme.Color.navyDark
+            )
+            StatusCard(
+                icon: "wind",
+                label: "WIND",
+                value: "\(Int(weatherService.snapshot.windSpeedMPH))mph \(weatherService.snapshot.windDirectionCardinal)",
+                tint: FieldFocusTheme.Color.navyDark
+            )
+        }
+    }
+
+    private var goldenHourText: String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "HH:mm"
+        if let start = weatherService.snapshot.goldenHourStart,
+           let end   = weatherService.snapshot.goldenHourEnd {
+            return "\(fmt.string(from: start))–\(fmt.string(from: end))"
+        }
+        return "–"
+    }
+
+    // MARK: - Location button
+    private var locationButton: some View {
+        Button {
+            showLocationSearch = true
+        } label: {
+            HStack {
+                Image(systemName: "mappin.and.ellipse")
+                Text("Change Shooting Location")
+                    .font(FieldFocusTheme.Typography.bodyMD())
+                Spacer()
+                Image(systemName: "chevron.right")
+            }
+            .foregroundColor(FieldFocusTheme.Color.orange)
+            .padding(FieldFocusTheme.Spacing.md)
+            .background(FieldFocusTheme.Color.surface)
+            .cornerRadius(FieldFocusTheme.Radius.base)
+            .overlay(
+                RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                    .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
+            )
+        }
+    }
+}
+
+// MARK: - Status Card component
+private struct StatusCard: View {
+    let icon: String
+    let label: String
+    let value: String
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.sm) {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(tint)
+                    .font(.system(size: 16, weight: .semibold))
+                Spacer()
+            }
+            Text(label)
+                .font(FieldFocusTheme.Typography.labelCaps())
+                .foregroundColor(FieldFocusTheme.Color.textSecondary)
+                .kerning(0.8)
+            Text(value)
+                .font(FieldFocusTheme.Typography.dataMono())
+                .foregroundColor(FieldFocusTheme.Color.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .padding(FieldFocusTheme.Spacing.md)
+        .background(FieldFocusTheme.Color.surface)
+        .cornerRadius(FieldFocusTheme.Radius.base)
+        .overlay(
+            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
+        )
+    }
+}
+
+#Preview {
+    WelcomeView()
+        .environmentObject(LocationService())
+        .environmentObject(WeatherService())
+        .environmentObject(PhotographyAdvisorService())
+}

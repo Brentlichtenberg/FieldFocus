@@ -1,0 +1,41 @@
+name: FieldFocus
+options:
+  bundleIdPrefix: com.appsOnapps
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  xcodeVersion: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    PRODUCT_BUNDLE_IDENTIFIER: com.appsOnapps.FieldFocus
+    INFOPLIST_FILE: FieldFocus/Resources/Info.plist
+targets:
+  FieldFocus:
+    type: application
+    platform: iOS
+    sources:
+      - path: FieldFocus
+        excludes:
+          - Resources/Info.plist
+    resources:
+      - FieldFocus/Resources/Assets.xcassets
+    info:
+      path: FieldFocus/Resources/Info.plist
+      properties:
+        CFBundleName: FieldFocus
+        CFBundleDisplayName: FieldFocus
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSLocationWhenInUseUsageDescription: "FieldFocus uses your location to fetch real-time weather and lighting conditions for photography advice."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "FieldFocus uses your location to fetch real-time weather and lighting conditions for photography advice."
+    settings:
+      base:
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
