@@ -32,6 +32,14 @@ final class LocationService: NSObject, ObservableObject {
         manager.stopUpdatingLocation()
     }
 
+    /// Sets a manually-chosen location without GPS. Triggers ContentView's weather refresh via
+    /// the `onChange(of: currentLocation)` observer.
+    func setManualLocation(coordinate: CLLocationCoordinate2D, name: String) {
+        stopUpdating()
+        currentLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        locationName = name
+    }
+
     private func reverseGeocode(_ location: CLLocation) {
         geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
             guard let self else { return }
