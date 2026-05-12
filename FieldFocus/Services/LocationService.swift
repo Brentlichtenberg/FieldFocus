@@ -1,6 +1,9 @@
 import Foundation
 import CoreLocation
 import Combine
+import os.log
+
+private let logger = Logger(subsystem: "com.appsOnapps.FieldFocus", category: "LocationService")
 
 @MainActor
 final class LocationService: NSObject, ObservableObject {
@@ -63,6 +66,8 @@ extension LocationService: CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log(.error, log: .default, "LocationService error: %{public}@", error.localizedDescription)
+        Task { @MainActor in
+            logger.error("LocationService error: \(error.localizedDescription)")
+        }
     }
 }

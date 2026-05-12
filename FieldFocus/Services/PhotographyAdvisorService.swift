@@ -27,10 +27,8 @@ final class PhotographyAdvisorService: ObservableObject {
         chatMessages.append(ChatMessage(role: .user, text: text))
         isThinking = true
         defer { isThinking = false }
-        // Simulate an AI response based on keyword matching + weather context
-        let response = await Task.detached(priority: .userInitiated) {
-            Self.generateChatResponse(userInput: text, weather: weather)
-        }.value
+        let snapshot = weather
+        let response = Self.generateChatResponse(userInput: text, weather: snapshot)
         chatMessages.append(ChatMessage(role: .assistant, text: response))
     }
 
