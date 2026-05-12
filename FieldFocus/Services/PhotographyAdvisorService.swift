@@ -14,7 +14,7 @@ final class PhotographyAdvisorService: ObservableObject {
     struct ChatMessage: Identifiable {
         let id = UUID()
         let role: Role
-        let text: String
+        var text: String
         enum Role { case user, assistant }
     }
 
@@ -25,11 +25,62 @@ final class PhotographyAdvisorService: ObservableObject {
 
     func sendMessage(_ text: String, weather: WeatherSnapshot) async {
         chatMessages.append(ChatMessage(role: .user, text: text))
+
+        // Seed an empty assistant message — tokens will stream in live
+        chatMessages.append(ChatMessage(role: .assistant, text: ""))
+        let idx = chatMessages.count - 1
         isThinking = true
-        defer { isThinking = false }
-        let snapshot = weather
-        let response = Self.generateChatResponse(userInput: text, weather: snapshot)
-        chatMessages.append(ChatMessage(role: .assistant, text: response))
+
+        // Build conversation history for the LLM (last 10 turns + system prompt)
+        var messages: [LLMService.Message] = [
+            .init(role: "system", content: Self.buildSystemPrompt(weather: weather))
+        ]
+        for msg in chatMessages.dropLast() {       // exclude the empty assistant placeholder
+            messages.append(.init(role: msg.role == .user ? "user" : "assistant", content: msg.text))
+        }
+
+        do {
+            isThinking = false
+            try await LLMService.streamChat(messages: messages) { [weak self] token in
+                guard let self else { return }
+                self.chatMessages[idx].text += token
+            }
+        } catch {
+            logger.error("LLM stream failed: \(error.localizedDescription) — using keyword fallback")
+            isThinking = false
+            chatMessages[idx].text = Self.generateChatResponse(userInput: text, weather: weather)
+        }
+    }
+
+    // MARK: - System prompt
+
+    private static func buildSystemPrompt(weather: WeatherSnapshot) -> String {
+        """
+        You are FieldFocus AI, an expert photography assistant built into a camera-guidance app for the Olympus Stylus 1s compact camera. \
+        You give concise, practical advice tailored specifically to the Stylus 1s hardware and its menus.
+
+        Current shooting conditions:
+        - Location: \(weather.locationName)
+        - Light condition: \(weather.condition.rawValue)
+        - Colour temperature: ~\(weather.temperatureKelvin)K
+        - Wind: \(String(format: "%.0f", weather.windSpeedMPH)) mph \(weather.windDirectionCardinal)
+
+        Olympus Stylus 1s key specs to keep in mind:
+        - 1/1.7\" BSI-CMOS sensor, 12 MP
+        - Fixed 10.7× zoom lens: f/2.8 at 28mm to f/5.9 at 300mm equivalent
+        - ISO 100–6400 (auto up to 12800)
+        - 5-axis in-body image stabilisation (up to 4 stops)
+        - Shooting modes: P, A, S, M, iAuto, Art Filters, SCN, Panorama, Movie
+        - Max shutter: 1/2000s mechanical; flash sync 1/250s
+        - NOT weather-sealed — protect from rain and dust
+        - Menu access: OK button → Super Control Panel; or MENU for full menu tree
+        - White balance adjustment: MENU → Shooting Menu 1 → WB
+        - Fn1/Fn2 buttons are user-assignable
+
+        Keep responses short (2–4 sentences), camera-specific, and immediately actionable. \
+        Where relevant, include the exact Stylus 1s menu path or button to use. \
+        Never recommend equipment the Stylus 1s doesn't support.
+        """
     }
 
     // MARK: - Advice generation (Stylus 1s knowledge base)

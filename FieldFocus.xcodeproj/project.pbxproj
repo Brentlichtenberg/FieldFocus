@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0800C9CAC9864241AB7D3834 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B796A2FC7364AD0F0CB06C /* LLMService.swift */; };
 		16720108D01F427861EAF03C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743E2B088C71BB30A8DF6FC5 /* ContentView.swift */; };
 		471136AC996AE011C02F1980 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E41BF3874B90D593533A759 /* Assets.xcassets */; };
 		495D4CC2813D98E068FC7878 /* PhotographyAdvisorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F62017D63D51D8C0B3CC1AF /* PhotographyAdvisorService.swift */; };
@@ -30,6 +31,7 @@
 		4207E10FD37EC18321792F56 /* FieldFocus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FieldFocus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A400DCB8FC690382258D53A /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		5E41BF3874B90D593533A759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		64B796A2FC7364AD0F0CB06C /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		6F62017D63D51D8C0B3CC1AF /* PhotographyAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotographyAdvisorService.swift; sourceTree = "<group>"; };
 		743E2B088C71BB30A8DF6FC5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		89EC43FF95335C8CD7ACB8A5 /* FieldFocusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldFocusApp.swift; sourceTree = "<group>"; };
@@ -45,6 +47,7 @@
 		0526923E16D319451808FF1A /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				64B796A2FC7364AD0F0CB06C /* LLMService.swift */,
 				4A400DCB8FC690382258D53A /* LocationService.swift */,
 				6F62017D63D51D8C0B3CC1AF /* PhotographyAdvisorService.swift */,
 				C2C8E58D73AB49E71F3808DB /* WeatherService.swift */,
@@ -204,6 +207,7 @@
 				D3DA32F21B2E7BA51AECBD1F /* FieldFocusApp.swift in Sources */,
 				D3DE24150639F89BA3E15C66 /* FieldFocusTheme.swift in Sources */,
 				CED4E27B506C9E57F529AC83 /* GearView.swift in Sources */,
+				0800C9CAC9864241AB7D3834 /* LLMService.swift in Sources */,
 				EF8168EF541E69755560C201 /* LocationSearchView.swift in Sources */,
 				F8F54F90B7CB1AD15E14E523 /* LocationService.swift in Sources */,
 				495D4CC2813D98E068FC7878 /* PhotographyAdvisorService.swift in Sources */,
