@@ -5,7 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var advisorService: PhotographyAdvisorService
 
-    @State private var selectedTab: AppTab = .guide
+    @State private var selectedTab: AppTab
 
     enum AppTab: String, CaseIterable {
         case guide   = "Guide"
@@ -21,6 +21,10 @@ struct ContentView: View {
             case .gear:   return "camera.fill"
             }
         }
+    }
+
+    init(initialTab: AppTab = .guide) {
+        _selectedTab = State(initialValue: initialTab)
     }
 
     var body: some View {
@@ -42,25 +46,5 @@ struct ContentView: View {
                 .tag(AppTab.gear)
         }
         .tint(FieldFocusTheme.Color.orange)
-        .onAppear {
-            locationService.requestLocationPermission()
-        }
-        .onChange(of: locationService.currentLocation) { _, location in
-            guard let location else { return }
-            Task {
-                await weatherService.fetchWeather(for: location)
-                advisorService.generateAdvice(for: weatherService.snapshot)
-            }
-        }
-        .onChange(of: locationService.locationName) { _, name in
-            weatherService.snapshot.locationName = name
-        }
     }
-}
-
-#Preview {
-    ContentView()
-        .environmentObject(LocationService())
-        .environmentObject(WeatherService())
-        .environmentObject(PhotographyAdvisorService())
 }

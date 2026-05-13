@@ -2,7 +2,7 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
-// MARK: - Persistent recent location
+// MARK: - Persistent model (mirrors LocationSearchView — same UserDefaults key)
 
 private struct RecentLocation: Identifiable, Codable {
     let id: UUID
@@ -33,15 +33,11 @@ private struct RecentLocation: Identifiable, Codable {
             UserDefaults.standard.set(data, forKey: key)
         }
     }
-
-    static func clearAll() {
-        UserDefaults.standard.removeObject(forKey: key)
-    }
 }
 
 // MARK: - Search result model
 
-private struct LocationResult: Identifiable {
+private struct OnboardingResult: Identifiable {
     let id = UUID()
     let name: String
     let subtitle: String?
@@ -50,41 +46,52 @@ private struct LocationResult: Identifiable {
 
 // MARK: - View
 
-struct LocationSearchView: View {
+struct OnboardingLocationView: View {
+    @Binding var hasCompletedOnboarding: Bool
+    let onComplete: () -> Void
+
     @EnvironmentObject var locationService: LocationService
-    @Environment(\.dismiss) private var dismiss
 
     @State private var searchText = ""
-    @State private var searchResults: [LocationResult] = []
+    @State private var searchResults: [OnboardingResult] = []
     @State private var isSearching = false
     @State private var recentLocations: [RecentLocation] = []
     @State private var searchTask: Task<Void, Never>?
+    @State private var waitingForGPS = false
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .top) {
-                FieldFocusTheme.Color.background.ignoresSafeArea()
+        ZStack(alignment: .top) {
+            FieldFocusTheme.Color.background.ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    headerBar
-                    ScrollView {
-                        VStack(spacing: FieldFocusTheme.Spacing.md) {
-                            searchBar
-                            if searchText.isEmpty {
-                                manualEntryButton
-                                if !recentLocations.isEmpty {
-                                    recentLocationsList
-                                }
-                            } else {
-                                searchResultsList
+            VStack(spacing: 0) {
+                headerBar
+                ScrollView {
+                    VStack(spacing: FieldFocusTheme.Spacing.md) {
+                        searchBar
+                        if searchText.isEmpty {
+                            gpsButton
+                            if !recentLocations.isEmpty {
+                                recentLocationsList
                             }
+                        } else {
+                            searchResultsList
                         }
-                        .padding(FieldFocusTheme.Spacing.pagePad)
                     }
+                    .padding(FieldFocusTheme.Spacing.pagePad)
                 }
             }
-            .navigationBarHidden(true)
-            .onAppear { recentLocations = RecentLocation.loadAll() }
+        }
+        .navigationBarHidden(true)
+        .onAppear { recentLocations = RecentLocation.loadAll() }
+        .onChange(of: locationService.currentLocation) { _, location in
+            guard waitingForGPS, let location else { return }
+            let name = locationService.locationName.isEmpty ? "Current Location" : locationService.locationName
+            RecentLocation.save(RecentLocation(
+                name: name,
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            ))
+            finish()
         }
     }
 
@@ -92,21 +99,20 @@ struct LocationSearchView: View {
 
     private var headerBar: some View {
         HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
+            Spacer()
+            VStack(spacing: 6) {
+                Image(systemName: "camera.aperture")
+                    .font(.system(size: 26))
+                    .foregroundColor(FieldFocusTheme.Color.orange)
+                Text("WHERE ARE YOU SHOOTING?")
+                    .font(FieldFocusTheme.Typography.labelCaps())
                     .foregroundColor(.white)
+                    .kerning(0.8)
             }
             Spacer()
-            Text("WHERE ARE YOU SHOOTING?")
-                .font(FieldFocusTheme.Typography.labelCaps())
-                .foregroundColor(.white)
-                .kerning(0.8)
-            Spacer()
-            Image(systemName: "xmark").opacity(0)
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
-        .padding(.vertical, FieldFocusTheme.Spacing.md)
+        .padding(.vertical, FieldFocusTheme.Spacing.lg)
         .background(FieldFocusTheme.Color.navyDark)
     }
 
@@ -116,7 +122,7 @@ struct LocationSearchView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(FieldFocusTheme.Color.textSecondary)
-            TextField("Search location…", text: $searchText)
+            TextField("Search city, zip code, or address…", text: $searchText)
                 .font(FieldFocusTheme.Typography.bodyMD())
                 .foregroundColor(FieldFocusTheme.Color.textPrimary)
                 .autocorrectionDisabled()
@@ -174,26 +180,30 @@ struct LocationSearchView: View {
 
     // MARK: - GPS button
 
-    private var manualEntryButton: some View {
+    private var gpsButton: some View {
         Button {
+            waitingForGPS = true
             locationService.startUpdating()
-            dismiss()
         } label: {
             HStack {
-                Image(systemName: "location.fill")
+                Image(systemName: waitingForGPS ? "location.north.line.fill" : "location.fill")
                     .foregroundColor(FieldFocusTheme.Color.orange)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("USE CURRENT LOCATION")
+                    Text(waitingForGPS ? "DETECTING LOCATION…" : "USE CURRENT LOCATION")
                         .font(FieldFocusTheme.Typography.labelCaps())
                         .foregroundColor(FieldFocusTheme.Color.textPrimary)
                         .kerning(0.8)
-                    Text("GPS auto-detect")
+                    Text(waitingForGPS ? "Please wait" : "GPS auto-detect")
                         .font(FieldFocusTheme.Typography.bodySM())
                         .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(FieldFocusTheme.Color.textSecondary)
+                if waitingForGPS {
+                    ProgressView().tint(FieldFocusTheme.Color.orange)
+                } else {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(FieldFocusTheme.Color.textSecondary)
+                }
             }
             .padding(FieldFocusTheme.Spacing.md)
             .background(FieldFocusTheme.Color.surface)
@@ -203,27 +213,17 @@ struct LocationSearchView: View {
                     .stroke(FieldFocusTheme.Color.orange.opacity(0.4), lineWidth: 1.5)
             )
         }
+        .disabled(waitingForGPS)
     }
 
     // MARK: - Recent locations
 
     private var recentLocationsList: some View {
         VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.sm) {
-            HStack {
-                Text("RECENT LOCATIONS")
-                    .font(FieldFocusTheme.Typography.labelCaps())
-                    .foregroundColor(FieldFocusTheme.Color.textSecondary)
-                    .kerning(0.8)
-                Spacer()
-                Button {
-                    RecentLocation.clearAll()
-                    recentLocations = []
-                } label: {
-                    Text("Clear")
-                        .font(FieldFocusTheme.Typography.bodySM())
-                        .foregroundColor(FieldFocusTheme.Color.orange)
-                }
-            }
+            Text("RECENT LOCATIONS")
+                .font(FieldFocusTheme.Typography.labelCaps())
+                .foregroundColor(FieldFocusTheme.Color.textSecondary)
+                .kerning(0.8)
             ForEach(recentLocations) { recent in
                 locationRow(icon: "clock.arrow.circlepath", title: recent.name, subtitle: nil) {
                     selectRecent(recent)
@@ -290,18 +290,21 @@ struct LocationSearchView: View {
                     item.placemark.country
                 ].compactMap { $0 }
                 let subtitle = subtitleParts.isEmpty ? nil : subtitleParts.joined(separator: ", ")
-                return LocationResult(name: name, subtitle: subtitle, coordinate: location.coordinate)
+                return OnboardingResult(name: name, subtitle: subtitle, coordinate: location.coordinate)
             }
         } catch {
             searchResults = []
         }
     }
 
-    private func selectResult(_ result: LocationResult) {
-        let recent = RecentLocation(name: result.name, latitude: result.coordinate.latitude, longitude: result.coordinate.longitude)
-        RecentLocation.save(recent)
+    private func selectResult(_ result: OnboardingResult) {
+        RecentLocation.save(RecentLocation(
+            name: result.name,
+            latitude: result.coordinate.latitude,
+            longitude: result.coordinate.longitude
+        ))
         locationService.setManualLocation(coordinate: result.coordinate, name: result.name)
-        dismiss()
+        finish()
     }
 
     private func selectRecent(_ recent: RecentLocation) {
@@ -309,11 +312,11 @@ struct LocationSearchView: View {
             coordinate: CLLocationCoordinate2D(latitude: recent.latitude, longitude: recent.longitude),
             name: recent.name
         )
-        dismiss()
+        finish()
     }
-}
 
-#Preview {
-    LocationSearchView()
-        .environmentObject(LocationService())
+    private func finish() {
+        onComplete()
+        hasCompletedOnboarding = true
+    }
 }
