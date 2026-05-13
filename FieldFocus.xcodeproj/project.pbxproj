@@ -19,6 +19,8 @@
 		CED4E27B506C9E57F529AC83 /* GearView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CA6633A875473433D63FC7 /* GearView.swift */; };
 		D3DA32F21B2E7BA51AECBD1F /* FieldFocusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89EC43FF95335C8CD7ACB8A5 /* FieldFocusApp.swift */; };
 		D3DE24150639F89BA3E15C66 /* FieldFocusTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40EAAD938C8B91FA28CD873 /* FieldFocusTheme.swift */; };
+		AA111111000000000000AA02 /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA111111000000000000AA01 /* LandingView.swift */; };
+		AA111111000000000000AA04 /* OnboardingLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA111111000000000000AA03 /* OnboardingLocationView.swift */; };
 		EF8168EF541E69755560C201 /* LocationSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9B379029A9AF07E7C683B6 /* LocationSearchView.swift */; };
 		F8F54F90B7CB1AD15E14E523 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A400DCB8FC690382258D53A /* LocationService.swift */; };
 		F936E33368C38AA8BD72AEDB /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A3E1F7F7E62ECFBBA3CF72 /* WeatherCondition.swift */; };
@@ -40,6 +42,8 @@
 		C1A3E1F7F7E62ECFBBA3CF72 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
 		C2C8E58D73AB49E71F3808DB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		F6CA6633A875473433D63FC7 /* GearView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GearView.swift; sourceTree = "<group>"; };
+		AA111111000000000000AA01 /* LandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingView.swift; sourceTree = "<group>"; };
+		AA111111000000000000AA03 /* OnboardingLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLocationView.swift; sourceTree = "<group>"; };
 		FC9B379029A9AF07E7C683B6 /* LocationSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSearchView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +119,8 @@
 				241297BAF91F4CC7272D7CDC /* AIAssistantView.swift */,
 				743E2B088C71BB30A8DF6FC5 /* ContentView.swift */,
 				F6CA6633A875473433D63FC7 /* GearView.swift */,
+				AA111111000000000000AA01 /* LandingView.swift */,
+				AA111111000000000000AA03 /* OnboardingLocationView.swift */,
 				FC9B379029A9AF07E7C683B6 /* LocationSearchView.swift */,
 				225796A1B30B091385575851 /* ShootingAdviceView.swift */,
 				153B917AAEE9552F77EC9181 /* WelcomeView.swift */,
@@ -208,6 +214,8 @@
 				D3DE24150639F89BA3E15C66 /* FieldFocusTheme.swift in Sources */,
 				CED4E27B506C9E57F529AC83 /* GearView.swift in Sources */,
 				0800C9CAC9864241AB7D3834 /* LLMService.swift in Sources */,
+				AA111111000000000000AA02 /* LandingView.swift in Sources */,
+				AA111111000000000000AA04 /* OnboardingLocationView.swift in Sources */,
 				EF8168EF541E69755560C201 /* LocationSearchView.swift in Sources */,
 				F8F54F90B7CB1AD15E14E523 /* LocationService.swift in Sources */,
 				495D4CC2813D98E068FC7878 /* PhotographyAdvisorService.swift in Sources */,
@@ -227,7 +235,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VKWCM8KJ76;
+				DEVELOPMENT_TEAM = FP95L29GU7;
 				INFOPLIST_FILE = FieldFocus/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -371,7 +379,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VKWCM8KJ76;
+				DEVELOPMENT_TEAM = FP95L29GU7;
 				INFOPLIST_FILE = FieldFocus/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
