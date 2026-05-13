@@ -254,23 +254,30 @@ private struct StatusCard: View {
     let tint: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.sm) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(tint)
-                    .font(.system(size: 16, weight: .semibold))
-                Spacer()
+        HStack(alignment: .center, spacing: FieldFocusTheme.Spacing.sm) {
+            Image(systemName: icon)
+                .foregroundColor(tint)
+                .font(.system(size: 20, weight: .semibold))
+                .frame(width: 28, alignment: .leading)
+
+            VStack(alignment: .center, spacing: 3) {
+                Text(label)
+                    .font(FieldFocusTheme.Typography.labelCaps())
+                    .foregroundColor(FieldFocusTheme.Color.textSecondary)
+                    .kerning(0.8)
+                    .multilineTextAlignment(.center)
+                Text(value)
+                    .font(FieldFocusTheme.Typography.dataMono())
+                    .foregroundColor(FieldFocusTheme.Color.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .multilineTextAlignment(.center)
             }
-            Text(label)
-                .font(FieldFocusTheme.Typography.labelCaps())
-                .foregroundColor(FieldFocusTheme.Color.textSecondary)
-                .kerning(0.8)
-            Text(value)
-                .font(FieldFocusTheme.Typography.dataMono())
-                .foregroundColor(FieldFocusTheme.Color.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+            .frame(maxWidth: .infinity, alignment: .center)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, FieldFocusTheme.Spacing.md)
+        .padding(.vertical, FieldFocusTheme.Spacing.sm + 2)
         .glassCard()
     }
 }
