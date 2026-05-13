@@ -23,6 +23,30 @@ final class PhotographyAdvisorService: ObservableObject {
         advice = Self.buildAdvice(weather: weather)
     }
 
+    // MARK: - Indoor advice (weather-independent)
+    static let indoorAdvice: ShootingAdvice = {
+        let settings = CameraSettings(
+            iso: "ISO 800",
+            aperture: "f/2.8",
+            shutterSpeed: "1/60s",
+            whiteBalance: "Auto (AWB)",
+            exposureCompensation: "+0.7 EV",
+            focusMode: "Single AF (S-AF)",
+            shootingMode: "Aperture Priority (A)",
+            isoNote: "Low-light balance",
+            apertureNote: "Max light intake",
+            shutterNote: "Hand-hold limit"
+        )
+        return ShootingAdvice(
+            settings: settings,
+            technicalAnalysis: "Indoor light is typically dim and warm. At f/2.8 the Stylus 1s gathers maximum light while creating pleasing subject separation. ISO 800 keeps noise manageable. Bump +0.7 EV — meters bias toward underexposure in dark rooms. Use Auto WB or Tungsten (3200K) if the light source is incandescent.",
+            compositionTip: "Seek natural window light and position your subject with it coming from one side — this gives flattering directionality without any equipment. Shoot parallel to the window for a soft Rembrandt-style shadow.",
+            equipmentTip: "The Stylus 1s built-in flash fires harsh light straight on. Reduce it via Menu → Shooting Menu 2 → Flash Intensity to -1.0 or -2.0 EV, or bounce off a white ceiling card for softer fill.",
+            lightQualityDescription: "Indoor mode active — weather & golden hour advice suppressed.",
+            lightWindowSeconds: nil
+        )
+    }()
+
     func sendMessage(_ text: String, weather: WeatherSnapshot) async {
         chatMessages.append(ChatMessage(role: .user, text: text))
 

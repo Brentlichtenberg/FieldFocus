@@ -6,6 +6,10 @@ struct ShootingAdviceView: View {
     @EnvironmentObject var advisorService: PhotographyAdvisorService
     @AppStorage("FieldFocus.isIndoorMode") private var isIndoorMode = false
 
+    private var activeAdvice: ShootingAdvice {
+        isIndoorMode ? PhotographyAdvisorService.indoorAdvice : advisorService.advice
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
@@ -116,7 +120,7 @@ struct ShootingAdviceView: View {
                         .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 }
             }
-            Text(advisorService.advice.lightQualityDescription)
+            Text(activeAdvice.lightQualityDescription)
                 .font(FieldFocusTheme.Typography.bodySM())
                 .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 .lineSpacing(4)
@@ -189,43 +193,43 @@ struct ShootingAdviceView: View {
             VStack(spacing: 1) {
                 settingRow(
                     label: "ISO",
-                    value: advisorService.advice.settings.iso,
-                    note: advisorService.advice.settings.isoNote
+                    value: activeAdvice.settings.iso,
+                    note: activeAdvice.settings.isoNote
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "APERTURE",
-                    value: advisorService.advice.settings.aperture,
-                    note: advisorService.advice.settings.apertureNote
+                    value: activeAdvice.settings.aperture,
+                    note: activeAdvice.settings.apertureNote
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "SHUTTER",
-                    value: advisorService.advice.settings.shutterSpeed,
-                    note: advisorService.advice.settings.shutterNote
+                    value: activeAdvice.settings.shutterSpeed,
+                    note: activeAdvice.settings.shutterNote
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "WHITE BAL",
-                    value: advisorService.advice.settings.whiteBalance,
+                    value: activeAdvice.settings.whiteBalance,
                     note: nil
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "EXP COMP",
-                    value: advisorService.advice.settings.exposureCompensation,
+                    value: activeAdvice.settings.exposureCompensation,
                     note: nil
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "MODE",
-                    value: advisorService.advice.settings.shootingMode,
+                    value: activeAdvice.settings.shootingMode,
                     note: nil
                 )
                 Divider().background(FieldFocusTheme.Color.outline)
                 settingRow(
                     label: "FOCUS",
-                    value: advisorService.advice.settings.focusMode,
+                    value: activeAdvice.settings.focusMode,
                     note: nil
                 )
             }
@@ -266,7 +270,7 @@ struct ShootingAdviceView: View {
                 .font(FieldFocusTheme.Typography.labelCaps())
                 .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 .kerning(0.8)
-            Text(advisorService.advice.technicalAnalysis)
+            Text(activeAdvice.technicalAnalysis)
                 .font(FieldFocusTheme.Typography.bodyMD())
                 .foregroundColor(FieldFocusTheme.Color.textPrimary)
                 .lineSpacing(5)
@@ -283,8 +287,8 @@ struct ShootingAdviceView: View {
     // MARK: - Tips row (composition + equipment)
     private var tipsRow: some View {
         HStack(alignment: .top, spacing: FieldFocusTheme.Spacing.sm) {
-            tipCard(icon: "square.grid.3x3.fill", label: "COMPOSITION", text: advisorService.advice.compositionTip)
-            tipCard(icon: "camera.filters", label: "EQUIPMENT", text: advisorService.advice.equipmentTip)
+            tipCard(icon: "square.grid.3x3.fill", label: "COMPOSITION", text: activeAdvice.compositionTip)
+            tipCard(icon: "camera.filters", label: "EQUIPMENT", text: activeAdvice.equipmentTip)
         }
     }
 
