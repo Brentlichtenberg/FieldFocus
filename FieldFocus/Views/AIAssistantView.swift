@@ -35,6 +35,7 @@ struct AIAssistantView: View {
                             }
                             .padding(FieldFocusTheme.Spacing.pagePad)
                         }
+                        .scrollDismissesKeyboard(.interactively)
                         .onChange(of: advisorService.chatMessages.count) { _, _ in
                             withAnimation { proxy.scrollTo(assistantId) }
                         }
@@ -43,6 +44,7 @@ struct AIAssistantView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onTapGesture { inputFocused = false }
         }
     }
 
@@ -274,9 +276,9 @@ struct ChatBubble: View {
                         .kerning(0.8)
                 }
                 Text(message.text)
-                    .font(FieldFocusTheme.Typography.bodyMD())
+                    .font(FieldFocusTheme.Typography.bodySM())
                     .foregroundColor(isUser ? .white : FieldFocusTheme.Color.textPrimary)
-                    .lineSpacing(4)
+                    .lineSpacing(3)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .modifier(ChatBubbleBackground(isUser: isUser))

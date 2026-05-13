@@ -65,6 +65,7 @@ struct WelcomeView: View {
 
     private var formattedTime: String {
         let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "en_US_POSIX") // prevent locale from appending AM/PM
         fmt.dateFormat = "H:mm"
         return fmt.string(from: now)
     }
@@ -80,12 +81,12 @@ struct WelcomeView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(height: 200)
+                .frame(height: 176)
 
             // Clock — top-left corner
             Text(formattedTime)
-                .font(.system(size: 26, weight: .bold, design: .monospaced))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.system(size: 20, weight: .semibold, design: .monospaced))
+                .foregroundColor(.white.opacity(0.85))
                 .padding(FieldFocusTheme.Spacing.md)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
@@ -100,7 +101,7 @@ struct WelcomeView: View {
                 }
                 Spacer()
                 Image(systemName: weatherService.snapshot.condition.systemIcon)
-                    .font(.system(size: 56))
+                    .font(.system(size: 44))
                     .foregroundColor(FieldFocusTheme.Color.orange)
                     .symbolRenderingMode(.hierarchical)
             }
