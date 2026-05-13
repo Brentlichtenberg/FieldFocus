@@ -53,15 +53,10 @@ struct WelcomeView: View {
                     .kerning(1)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(formattedTime)
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-                Text(weatherService.snapshot.dayPhase.rawValue.uppercased())
-                    .font(FieldFocusTheme.Typography.labelCaps())
-                    .foregroundColor(.white.opacity(0.65))
-                    .kerning(0.8)
-            }
+            Text(weatherService.snapshot.dayPhase.rawValue.uppercased())
+                .font(FieldFocusTheme.Typography.labelCaps())
+                .foregroundColor(.white.opacity(0.65))
+                .kerning(0.8)
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.md)
@@ -87,6 +82,14 @@ struct WelcomeView: View {
                 )
                 .frame(height: 200)
 
+            // Clock — top-left corner
+            Text(formattedTime)
+                .font(.system(size: 26, weight: .bold, design: .monospaced))
+                .foregroundColor(.white.opacity(0.9))
+                .padding(FieldFocusTheme.Spacing.md)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+            // Bottom row — condition chip, location, weather icon
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     conditionChip
