@@ -115,15 +115,25 @@ struct WelcomeView: View {
             Text(weatherService.snapshot.condition.rawValue.uppercased())
                 .font(FieldFocusTheme.Typography.labelCaps())
         }
-        .foregroundColor(FieldFocusTheme.Color.navyDark)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(FieldFocusTheme.Color.orange)
-        .clipShape(Capsule())
+        .glassChip(tint: FieldFocusTheme.Color.orange, foreground: FieldFocusTheme.Color.navyDark)
     }
 
     // MARK: - Status grid
     private var statusGrid: some View {
+        Group {
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: 12) {
+                    statusGridContent
+                }
+            } else {
+                statusGridContent
+            }
+        }
+    }
+
+    private var statusGridContent: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: FieldFocusTheme.Spacing.sm) {
             StatusCard(
                 icon: "sun.horizon.fill",
@@ -187,13 +197,8 @@ struct WelcomeView: View {
             }
             .foregroundColor(FieldFocusTheme.Color.orange)
             .padding(FieldFocusTheme.Spacing.md)
-            .background(FieldFocusTheme.Color.surface)
-            .cornerRadius(FieldFocusTheme.Radius.base)
-            .overlay(
-                RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                    .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-            )
         }
+        .glassCard()
     }
 
     // MARK: - Indoor mode toggle
@@ -213,12 +218,29 @@ struct WelcomeView: View {
                     .foregroundColor(isIndoorMode ? .white.opacity(0.8) : FieldFocusTheme.Color.textSecondary)
             }
             .padding(FieldFocusTheme.Spacing.md)
-            .background(isIndoorMode ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.surface)
-            .cornerRadius(FieldFocusTheme.Radius.base)
-            .overlay(
-                RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                    .stroke(isIndoorMode ? FieldFocusTheme.Color.navyMid : FieldFocusTheme.Color.outline, lineWidth: 1)
-            )
+        }
+        .modifier(IndoorModeButtonStyle(isActive: isIndoorMode))
+    }
+}
+
+// MARK: - Indoor mode button style modifier
+private struct IndoorModeButtonStyle: ViewModifier {
+    let isActive: Bool
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(
+                    isActive ? .regular.tint(FieldFocusTheme.Color.navyDark) : .regular,
+                    in: .rect(cornerRadius: FieldFocusTheme.Radius.base)
+                )
+        } else {
+            content
+                .background(isActive ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.surface)
+                .cornerRadius(FieldFocusTheme.Radius.base)
+                .overlay(
+                    RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                        .stroke(isActive ? FieldFocusTheme.Color.navyMid : FieldFocusTheme.Color.outline, lineWidth: 1)
+                )
         }
     }
 }
@@ -248,19 +270,18 @@ private struct StatusCard: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
-        .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 }
 
 #Preview {
-    WelcomeView()
-        .environmentObject(LocationService())
-        .environmentObject(WeatherService())
-        .environmentObject(PhotographyAdvisorService())
+    StatusCard(
+        icon: "sun.max.fill",
+        label: "GOLDEN HOUR",
+        value: "18:42",
+        tint: FieldFocusTheme.Color.orange
+    )
+    .environmentObject(LocationService())
+    .environmentObject(WeatherService())
+    .environmentObject(PhotographyAdvisorService())
 }

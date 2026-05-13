@@ -132,9 +132,8 @@ struct AIAssistantView: View {
                             .foregroundColor(FieldFocusTheme.Color.orange)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(FieldFocusTheme.Color.orange.opacity(0.08))
-                            .cornerRadius(FieldFocusTheme.Radius.full)
                     }
+                    .modifier(GlassPromptChip())
                 }
             }
         }
@@ -171,12 +170,7 @@ struct AIAssistantView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(FieldFocusTheme.Color.surface)
-            .cornerRadius(FieldFocusTheme.Radius.lg)
-            .overlay(
-                RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.lg)
-                    .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-            )
+            .glassCard(cornerRadius: FieldFocusTheme.Radius.lg)
             Spacer()
         }
     }
@@ -191,12 +185,7 @@ struct AIAssistantView: View {
                 .lineLimit(1...4)
                 .padding(.horizontal, FieldFocusTheme.Spacing.md)
                 .padding(.vertical, 10)
-                .background(FieldFocusTheme.Color.surface)
-                .cornerRadius(FieldFocusTheme.Radius.full)
-                .overlay(
-                    RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.full)
-                        .stroke(inputFocused ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.outline, lineWidth: 1)
-                )
+                .modifier(GlassInputField(isFocused: inputFocused))
 
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
@@ -207,7 +196,7 @@ struct AIAssistantView: View {
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.sm)
-        .background(FieldFocusTheme.Color.surfaceLow)
+        .background(FieldFocusTheme.Color.surfaceLow) // intentional: not glass — structural bar
         .overlay(Divider(), alignment: .top)
     }
 
@@ -218,6 +207,42 @@ struct AIAssistantView: View {
         inputFocused = false
         Task {
             await advisorService.sendMessage(text, weather: weatherService.snapshot)
+        }
+    }
+}
+
+// MARK: - Glass prompt chip modifier
+private struct GlassPromptChip: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(.regular.interactive(), in: .capsule)
+        } else {
+            content
+                .background(FieldFocusTheme.Color.orange.opacity(0.08))
+                .cornerRadius(FieldFocusTheme.Radius.full)
+        }
+    }
+}
+
+// MARK: - Glass input field modifier
+private struct GlassInputField: ViewModifier {
+    let isFocused: Bool
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(
+                    isFocused ? .regular.tint(FieldFocusTheme.Color.navyDark) : .regular,
+                    in: .capsule
+                )
+        } else {
+            content
+                .background(FieldFocusTheme.Color.surface)
+                .cornerRadius(FieldFocusTheme.Radius.full)
+                .overlay(
+                    RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.full)
+                        .stroke(isFocused ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.outline, lineWidth: 1)
+                )
         }
     }
 }
@@ -254,12 +279,7 @@ struct ChatBubble: View {
                     .lineSpacing(4)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(isUser ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.surface)
-                    .cornerRadius(FieldFocusTheme.Radius.lg)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.lg)
-                            .stroke(isUser ? Color.clear : FieldFocusTheme.Color.outline, lineWidth: 1)
-                    )
+                    .modifier(ChatBubbleBackground(isUser: isUser))
             }
 
             if isUser {
@@ -269,6 +289,32 @@ struct ChatBubble: View {
             }
 
             if !isUser { Spacer(minLength: 60) }
+        }
+    }
+}
+
+// MARK: - Chat bubble background modifier
+private struct ChatBubbleBackground: ViewModifier {
+    let isUser: Bool
+    func body(content: Content) -> some View {
+        if isUser {
+            // User bubbles stay navy — intentional dark treatment
+            content
+                .background(FieldFocusTheme.Color.navyDark)
+                .cornerRadius(FieldFocusTheme.Radius.lg)
+        } else {
+            if #available(iOS 26, *) {
+                content
+                    .glassEffect(.regular, in: .rect(cornerRadius: FieldFocusTheme.Radius.lg))
+            } else {
+                content
+                    .background(FieldFocusTheme.Color.surface)
+                    .cornerRadius(FieldFocusTheme.Radius.lg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.lg)
+                            .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
+                    )
+            }
         }
     }
 }

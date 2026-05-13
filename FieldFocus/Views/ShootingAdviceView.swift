@@ -97,12 +97,7 @@ struct ShootingAdviceView: View {
             Spacer()
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.navyDark)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.navyMid, lineWidth: 1)
-        )
+        .modifier(NavyGlassCard())
     }
 
     // MARK: - Condition header card
@@ -126,12 +121,7 @@ struct ShootingAdviceView: View {
                 .lineSpacing(4)
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     private func conditionBadge(_ condition: LightCondition) -> some View {
@@ -145,8 +135,7 @@ struct ShootingAdviceView: View {
         .foregroundColor(.white)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(FieldFocusTheme.Color.navyDark)
-        .clipShape(Capsule())
+        .glassChip(tint: FieldFocusTheme.Color.navyDark, foreground: .white)
     }
 
     // MARK: - Light window countdown
@@ -235,12 +224,7 @@ struct ShootingAdviceView: View {
             }
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     private func settingRow(label: String, value: String, note: String?) -> some View {
@@ -276,16 +260,23 @@ struct ShootingAdviceView: View {
                 .lineSpacing(5)
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     // MARK: - Tips row (composition + equipment)
     private var tipsRow: some View {
+        Group {
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: 8) {
+                    tipsRowContent
+                }
+            } else {
+                tipsRowContent
+            }
+        }
+    }
+
+    private var tipsRowContent: some View {
         HStack(alignment: .top, spacing: FieldFocusTheme.Spacing.sm) {
             tipCard(icon: "square.grid.3x3.fill", label: "COMPOSITION", text: activeAdvice.compositionTip)
             tipCard(icon: "camera.filters", label: "EQUIPMENT", text: activeAdvice.equipmentTip)
@@ -310,12 +301,26 @@ struct ShootingAdviceView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
+    }
+}
+
+// MARK: - Navy-tinted glass card modifier (indoor mode banner)
+private struct NavyGlassCard: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(.regular.tint(FieldFocusTheme.Color.navyDark),
+                             in: .rect(cornerRadius: FieldFocusTheme.Radius.base))
+        } else {
+            content
+                .background(FieldFocusTheme.Color.navyDark)
+                .cornerRadius(FieldFocusTheme.Radius.base)
+                .overlay(
+                    RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                        .stroke(FieldFocusTheme.Color.navyMid, lineWidth: 1)
+                )
+        }
     }
 }
 

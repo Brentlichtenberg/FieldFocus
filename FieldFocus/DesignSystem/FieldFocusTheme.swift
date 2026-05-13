@@ -62,6 +62,43 @@ enum FieldFocusTheme {
     }
 }
 
+// MARK: - Liquid Glass view modifier helpers (iOS 26+)
+extension View {
+    /// Replaces the standard `.background(surface) + .cornerRadius + .overlay(stroke)` card pattern.
+    /// On iOS 26+ renders a native Liquid Glass surface; falls back to the existing card style below.
+    @ViewBuilder
+    func glassCard(cornerRadius: CGFloat = FieldFocusTheme.Radius.base) -> some View {
+        if #available(iOS 26, *) {
+            self.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            self
+                .background(FieldFocusTheme.Color.surface)
+                .cornerRadius(cornerRadius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
+                )
+        }
+    }
+
+    /// Replaces tinted capsule chips/badges. On iOS 26+ renders an interactive glass capsule
+    /// tinted with the given colour; falls back to a filled capsule.
+    @ViewBuilder
+    func glassChip(tint: SwiftUI.Color = FieldFocusTheme.Color.orange,
+                   foreground: SwiftUI.Color = FieldFocusTheme.Color.navyDark) -> some View {
+        if #available(iOS 26, *) {
+            self
+                .foregroundColor(foreground)
+                .glassEffect(.regular.tint(tint).interactive(), in: .capsule)
+        } else {
+            self
+                .foregroundColor(foreground)
+                .background(tint)
+                .clipShape(Capsule())
+        }
+    }
+}
+
 // MARK: - Color hex initializer
 extension SwiftUI.Color {
     init(hex: String) {

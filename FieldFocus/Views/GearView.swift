@@ -10,10 +10,14 @@ struct GearView: View {
                 VStack(spacing: 0) {
                     headerBar
                     ScrollView(showsIndicators: false) {
-                        VStack(spacing: FieldFocusTheme.Spacing.md) {
-                            cameraCard
-                            quickRefCard
-                            modeGuideCard
+                        Group {
+                            if #available(iOS 26, *) {
+                                GlassEffectContainer(spacing: 16) {
+                                    gearCardsContent
+                                }
+                            } else {
+                                gearCardsContent
+                            }
                         }
                         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
                         .padding(.vertical, FieldFocusTheme.Spacing.md)
@@ -46,6 +50,14 @@ struct GearView: View {
         .background(FieldFocusTheme.Color.navyDark)
     }
 
+    private var gearCardsContent: some View {
+        VStack(spacing: FieldFocusTheme.Spacing.md) {
+            cameraCard
+            quickRefCard
+            modeGuideCard
+        }
+    }
+
     // MARK: - Camera spec card
     private var cameraCard: some View {
         VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.md) {
@@ -61,8 +73,7 @@ struct GearView: View {
                     .kerning(0.8)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.green.opacity(0.75))
-                    .clipShape(Capsule())
+                    .glassChip(tint: .green, foreground: .white)
             }
 
             ForEach(cameraSpecs, id: \.0) { spec in
@@ -73,12 +84,7 @@ struct GearView: View {
             }
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     private var cameraSpecs: [(String, String)] = [
@@ -137,12 +143,7 @@ struct GearView: View {
             }
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     private var quickRefs: [(String, String, String)] = [
@@ -183,12 +184,7 @@ struct GearView: View {
             }
         }
         .padding(FieldFocusTheme.Spacing.md)
-        .background(FieldFocusTheme.Color.surface)
-        .cornerRadius(FieldFocusTheme.Radius.base)
-        .overlay(
-            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
-                .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
-        )
+        .glassCard()
     }
 
     private var modeGuide: [(String, String)] = [

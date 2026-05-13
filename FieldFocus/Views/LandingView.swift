@@ -103,18 +103,60 @@ struct LandingView: View {
                 .lineSpacing(4)
 
             // Preview stat cards (static design values, replaced by live data after onboarding)
-            LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible())],
-                spacing: FieldFocusTheme.Spacing.sm
-            ) {
-                statCard(icon: "sun.horizon.fill",     label: "GOLDEN HOUR", value: "18:42–19:15", tint: FieldFocusTheme.Color.orange)
-                statCard(icon: "cloud.fill",            label: "CONDITIONS",  value: "OVERCAST",    tint: .white.opacity(0.5))
-                statCard(icon: "mappin.fill",           label: "TOP SPOT",    value: "SET LOCATION", tint: .white.opacity(0.4))
-                statCard(icon: "checkmark.shield.fill", label: "GEAR READY",  value: "100% CHECK",  tint: FieldFocusTheme.Color.orange)
+            Group {
+                if #available(iOS 26, *) {
+                    GlassEffectContainer(spacing: 12) {
+                        statCardsGrid
+                    }
+                } else {
+                    statCardsGrid
+                }
             }
 
             Spacer()
 
+            getStartedButton
+                .padding(.bottom, FieldFocusTheme.Spacing.xl)
+        }
+        .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
+        .padding(.top, FieldFocusTheme.Spacing.lg)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(FieldFocusTheme.Color.navyDark)
+    }
+
+    private var statCardsGrid: some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible()), GridItem(.flexible())],
+            spacing: FieldFocusTheme.Spacing.sm
+        ) {
+            statCard(icon: "sun.horizon.fill",     label: "GOLDEN HOUR", value: "18:42–19:15", tint: FieldFocusTheme.Color.orange)
+            statCard(icon: "cloud.fill",            label: "CONDITIONS",  value: "OVERCAST",    tint: .white.opacity(0.5))
+            statCard(icon: "mappin.fill",           label: "TOP SPOT",    value: "SET LOCATION", tint: .white.opacity(0.4))
+            statCard(icon: "checkmark.shield.fill", label: "GEAR READY",  value: "100% CHECK",  tint: FieldFocusTheme.Color.orange)
+        }
+    }
+
+    @ViewBuilder
+    private var getStartedButton: some View {
+        if #available(iOS 26, *) {
+            Button {
+                navigateToLocation = true
+            } label: {
+                HStack(spacing: FieldFocusTheme.Spacing.sm) {
+                    Spacer()
+                    Text("Get Started")
+                        .font(FieldFocusTheme.Typography.headlineSM())
+                        .foregroundColor(.white)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .padding(.vertical, FieldFocusTheme.Spacing.md)
+            }
+            .tint(FieldFocusTheme.Color.orange)
+            .buttonStyle(.glassProminent)
+        } else {
             Button {
                 navigateToLocation = true
             } label: {
@@ -132,12 +174,7 @@ struct LandingView: View {
                 .background(FieldFocusTheme.Color.orange)
                 .cornerRadius(FieldFocusTheme.Radius.lg)
             }
-            .padding(.bottom, FieldFocusTheme.Spacing.xl)
         }
-        .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
-        .padding(.top, FieldFocusTheme.Spacing.lg)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(FieldFocusTheme.Color.navyDark)
     }
 
     private func statCard(icon: String, label: String, value: String, tint: Color) -> some View {
@@ -162,8 +199,21 @@ struct LandingView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(FieldFocusTheme.Spacing.sm)
-        .background(.white.opacity(0.05))
-        .cornerRadius(FieldFocusTheme.Radius.base)
+        .modifier(LandingStatCard())
+    }
+}
+
+// MARK: - Landing stat card background modifier
+private struct LandingStatCard: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(.regular, in: .rect(cornerRadius: FieldFocusTheme.Radius.base))
+        } else {
+            content
+                .background(.white.opacity(0.05))
+                .cornerRadius(FieldFocusTheme.Radius.base)
+        }
     }
 }
 
