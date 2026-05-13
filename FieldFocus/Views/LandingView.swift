@@ -30,7 +30,7 @@ struct LandingView: View {
     private var heroSection: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: "#0D2444"), FieldFocusTheme.Color.navyDark],
+                colors: [Color(hex: "#1F4070"), FieldFocusTheme.Color.navyDark],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

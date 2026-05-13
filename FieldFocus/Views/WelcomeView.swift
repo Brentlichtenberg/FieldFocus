@@ -7,6 +7,7 @@ struct WelcomeView: View {
     @EnvironmentObject var advisorService: PhotographyAdvisorService
 
     @State private var showLocationSearch = false
+    @AppStorage("FieldFocus.isIndoorMode") private var isIndoorMode = false
 
     var body: some View {
         NavigationStack {
@@ -20,6 +21,7 @@ struct WelcomeView: View {
                             heroCard
                             statusGrid
                             locationButton
+                            indoorModeButton
                         }
                         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
                         .padding(.vertical, FieldFocusTheme.Spacing.md)
@@ -160,6 +162,32 @@ struct WelcomeView: View {
             .overlay(
                 RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
                     .stroke(FieldFocusTheme.Color.outline, lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Indoor mode toggle
+    private var indoorModeButton: some View {
+        Button {
+            isIndoorMode.toggle()
+        } label: {
+            HStack {
+                Image(systemName: isIndoorMode ? "house.fill" : "house")
+                    .foregroundColor(isIndoorMode ? .white : FieldFocusTheme.Color.textSecondary)
+                Text(isIndoorMode ? "Indoor Mode: ON" : "Indoor Mode")
+                    .font(FieldFocusTheme.Typography.bodyMD())
+                    .foregroundColor(isIndoorMode ? .white : FieldFocusTheme.Color.textSecondary)
+                Spacer()
+                Text(isIndoorMode ? "Ignoring weather & golden hour" : "Tap to activate")
+                    .font(FieldFocusTheme.Typography.bodySM())
+                    .foregroundColor(isIndoorMode ? .white.opacity(0.8) : FieldFocusTheme.Color.textSecondary)
+            }
+            .padding(FieldFocusTheme.Spacing.md)
+            .background(isIndoorMode ? FieldFocusTheme.Color.navyDark : FieldFocusTheme.Color.surface)
+            .cornerRadius(FieldFocusTheme.Radius.base)
+            .overlay(
+                RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                    .stroke(isIndoorMode ? FieldFocusTheme.Color.navyMid : FieldFocusTheme.Color.outline, lineWidth: 1)
             )
         }
     }

@@ -81,7 +81,7 @@ struct OnboardingLocationView: View {
                 }
             }
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear { recentLocations = RecentLocation.loadAll() }
         .onChange(of: locationService.currentLocation) { _, location in
             guard waitingForGPS, let location else { return }
@@ -97,9 +97,24 @@ struct OnboardingLocationView: View {
 
     // MARK: - Header
 
+    @Environment(\.dismiss) private var dismiss
+
     private var headerBar: some View {
-        HStack {
-            Spacer()
+        ZStack {
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Color.white.opacity(0.12))
+                        .clipShape(Circle())
+                }
+                Spacer()
+            }
+
             VStack(spacing: 6) {
                 Image(systemName: "camera.aperture")
                     .font(.system(size: 26))
@@ -109,7 +124,6 @@ struct OnboardingLocationView: View {
                     .foregroundColor(.white)
                     .kerning(0.8)
             }
-            Spacer()
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.lg)

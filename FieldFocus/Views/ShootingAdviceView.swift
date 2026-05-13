@@ -4,6 +4,7 @@ import SwiftUI
 struct ShootingAdviceView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var advisorService: PhotographyAdvisorService
+    @AppStorage("FieldFocus.isIndoorMode") private var isIndoorMode = false
 
     var body: some View {
         NavigationStack {
@@ -20,8 +21,12 @@ struct ShootingAdviceView: View {
                     } else {
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: FieldFocusTheme.Spacing.md) {
-                                conditionHeader
-                                lightWindowCard
+                                if isIndoorMode {
+                                    indoorModeBanner
+                                } else {
+                                    conditionHeader
+                                    lightWindowCard
+                                }
                                 cameraSettingsCard
                                 technicalAnalysisCard
                                 tipsRow
@@ -49,14 +54,51 @@ struct ShootingAdviceView: View {
                     .foregroundColor(.white)
             }
             Spacer()
-            Image(systemName: weatherService.snapshot.condition.systemIcon)
-                .font(.system(size: 28))
+            if isIndoorMode {
+                HStack(spacing: 4) {
+                    Image(systemName: "house.fill")
+                    Text("INDOOR")
+                        .font(FieldFocusTheme.Typography.labelCaps())
+                        .kerning(0.5)
+                }
                 .foregroundColor(FieldFocusTheme.Color.orange)
-                .symbolRenderingMode(.hierarchical)
+                .font(.system(size: 13, weight: .semibold))
+            } else {
+                Image(systemName: weatherService.snapshot.condition.systemIcon)
+                    .font(.system(size: 28))
+                    .foregroundColor(FieldFocusTheme.Color.orange)
+                    .symbolRenderingMode(.hierarchical)
+            }
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.md)
         .background(FieldFocusTheme.Color.navyDark)
+    }
+
+    // MARK: - Indoor mode banner
+    private var indoorModeBanner: some View {
+        HStack(spacing: FieldFocusTheme.Spacing.sm) {
+            Image(systemName: "house.fill")
+                .font(.system(size: 20))
+                .foregroundColor(FieldFocusTheme.Color.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("INDOOR MODE ACTIVE")
+                    .font(FieldFocusTheme.Typography.labelCaps())
+                    .foregroundColor(FieldFocusTheme.Color.orange)
+                    .kerning(0.6)
+                Text("Golden hour & weather advice hidden")
+                    .font(FieldFocusTheme.Typography.bodySM())
+                    .foregroundColor(FieldFocusTheme.Color.textSecondary)
+            }
+            Spacer()
+        }
+        .padding(FieldFocusTheme.Spacing.md)
+        .background(FieldFocusTheme.Color.navyDark)
+        .cornerRadius(FieldFocusTheme.Radius.base)
+        .overlay(
+            RoundedRectangle(cornerRadius: FieldFocusTheme.Radius.base)
+                .stroke(FieldFocusTheme.Color.navyMid, lineWidth: 1)
+        )
     }
 
     // MARK: - Condition header card
