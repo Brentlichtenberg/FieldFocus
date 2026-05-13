@@ -8,6 +8,9 @@ struct WelcomeView: View {
 
     @State private var showLocationSearch = false
     @AppStorage("FieldFocus.isIndoorMode") private var isIndoorMode = false
+    @State private var now = Date()
+
+    private let clockTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack {
@@ -32,6 +35,7 @@ struct WelcomeView: View {
             .sheet(isPresented: $showLocationSearch) {
                 LocationSearchView()
             }
+            .onReceive(clockTimer) { _ in now = Date() }
         }
     }
 
@@ -49,13 +53,25 @@ struct WelcomeView: View {
                     .kerning(1)
             }
             Spacer()
-            Image(systemName: "person.crop.circle")
-                .font(.system(size: 28))
-                .foregroundColor(.white.opacity(0.85))
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(formattedTime)
+                    .font(.system(size: 28, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white)
+                Text(weatherService.snapshot.dayPhase.rawValue.uppercased())
+                    .font(FieldFocusTheme.Typography.labelCaps())
+                    .foregroundColor(.white.opacity(0.65))
+                    .kerning(0.8)
+            }
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.md)
         .background(FieldFocusTheme.Color.navyDark)
+    }
+
+    private var formattedTime: String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "H:mm"
+        return fmt.string(from: now)
     }
 
     // MARK: - Hero card
@@ -109,7 +125,7 @@ struct WelcomeView: View {
             StatusCard(
                 icon: "sun.horizon.fill",
                 label: "GOLDEN HOUR",
-                value: goldenHourText,
+                value: nextGoldenHourText,
                 tint: FieldFocusTheme.Color.orange
             )
             StatusCard(
@@ -133,14 +149,25 @@ struct WelcomeView: View {
         }
     }
 
-    private var goldenHourText: String {
+    private var nextGoldenHourText: String {
         let fmt = DateFormatter()
-        fmt.dateFormat = "HH:mm"
-        if let start = weatherService.snapshot.goldenHourStart,
-           let end   = weatherService.snapshot.goldenHourEnd {
+        fmt.dateFormat = "H:mm"
+        let n = now
+        // Morning golden hour — show if it hasn't ended yet
+        if let start = weatherService.snapshot.morningGoldenHourStart,
+           let end = weatherService.snapshot.morningGoldenHourEnd,
+           n < end {
+            if n >= start { return "NOW ☀" }
             return "\(fmt.string(from: start))–\(fmt.string(from: end))"
         }
-        return "–"
+        // Evening golden hour — show if it hasn't ended yet
+        if let start = weatherService.snapshot.goldenHourStart,
+           let end = weatherService.snapshot.goldenHourEnd,
+           n < end {
+            if n >= start { return "NOW ☀" }
+            return "\(fmt.string(from: start))–\(fmt.string(from: end))"
+        }
+        return "Tomorrow"
     }
 
     // MARK: - Location button

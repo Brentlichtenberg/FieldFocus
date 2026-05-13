@@ -59,24 +59,50 @@ private struct OpenMeteoResponse: Decodable {
     let daily: Daily
 
     func toWeatherSnapshot(locationName: String) -> WeatherSnapshot {
-        let condition = LightCondition.from(weatherCode: current.weathercode, cloudCover: current.cloudcover)
+        let weatherCondition = LightCondition.from(weatherCode: current.weathercode, cloudCover: current.cloudcover)
         let direction = cardinalDirection(degrees: current.winddirection10m)
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime]
         let sunrise = daily.sunrise.first.flatMap { iso.date(from: $0 + ":00") }
         let sunset  = daily.sunset.first.flatMap  { iso.date(from: $0 + ":00") }
+
+        // Morning golden hour: sunrise to sunrise + 45 min
+        let morningGoldenStart = sunrise
+        let morningGoldenEnd   = sunrise.map { $0.addingTimeInterval(45 * 60) }
+
+        // Evening golden hour: sunset - 45 min to sunset + 20 min
         let goldenStart = sunset.map { $0.addingTimeInterval(-45 * 60) }
         let goldenEnd   = sunset.map { $0.addingTimeInterval(20 * 60) }
+
+        // Derive the solar day phase
+        let phase = DayPhase.compute(sunrise: sunrise, sunset: sunset)
+
+        // Time-based conditions override weather-code-based ones
+        let condition: LightCondition
+        switch phase {
+        case .nightPreDawn, .nightPostDusk:
+            condition = .night
+        case .blueHourMorn, .blueHourEve:
+            condition = .blueHour
+        case .goldenMorn, .goldenEvening:
+            condition = .goldenHour
+        default:
+            condition = weatherCondition
+        }
+
         return WeatherSnapshot(
             condition: condition,
-            temperatureKelvin: colorTemperature(for: condition),
+            temperatureKelvin: colorTemperature(for: condition, phase: phase),
             cloudCoverPercent: current.cloudcover,
             windSpeedMPH: current.windspeed10m * 0.621371,
             windDirectionCardinal: direction,
             goldenHourStart: goldenStart,
             goldenHourEnd: goldenEnd,
+            morningGoldenHourStart: morningGoldenStart,
+            morningGoldenHourEnd: morningGoldenEnd,
             sunriseTime: sunrise,
             sunsetTime: sunset,
+            dayPhase: phase,
             locationName: locationName
         )
     }
@@ -88,16 +114,23 @@ private func cardinalDirection(degrees: Double) -> String {
     return directions[index]
 }
 
-private func colorTemperature(for condition: LightCondition) -> Int {
+private func colorTemperature(for condition: LightCondition, phase: DayPhase) -> Int {
     switch condition {
     case .goldenHour: return 3200
     case .blueHour:   return 8000
+    case .night:      return 3400
     case .overcast:   return 6500
-    case .brightSun:  return 5500
-    case .cloudy:     return 6000
     case .rain:       return 7000
     case .snow:       return 6500
-    case .night:      return 3400
+    case .brightSun, .cloudy:
+        switch phase {
+        case .earlyMorning:  return 4200
+        case .morning:       return 4800
+        case .solarNoon:     return 5500
+        case .afternoon:     return 4800
+        case .lateAfternoon: return 4000
+        default:             return 5500
+        }
     }
 }
 

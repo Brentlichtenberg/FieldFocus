@@ -86,6 +86,7 @@ final class PhotographyAdvisorService: ObservableObject {
         Current shooting conditions:
         - Location: \(weather.locationName)
         - Light condition: \(weather.condition.rawValue)
+        - Day phase: \(weather.dayPhase.rawValue)
         - Colour temperature: ~\(weather.temperatureKelvin)K
         - Wind: \(String(format: "%.0f", weather.windSpeedMPH)) mph \(weather.windDirectionCardinal)
 
@@ -171,22 +172,97 @@ final class PhotographyAdvisorService: ObservableObject {
             lightDesc = "Soft, directional-free light. Ideal for portraits, macro, and detail shots."
 
         case .brightSun:
-            settings = CameraSettings(
-                iso: "ISO 100",
-                aperture: "f/8.0",
-                shutterSpeed: "1/1000s",
-                whiteBalance: "Daylight (5500K)",
-                exposureCompensation: "-0.3 EV",
-                focusMode: "Single AF (S-AF)",
-                shootingMode: "Shutter Priority (S)",
-                isoNote: "Base ISO",
-                apertureNote: "Deep depth",
-                shutterNote: "Freeze fast motion"
-            )
-            technical = "Bright midday sun is high-contrast. f/8 gives deep depth-of-field and eliminates diffraction. Expose for the highlights (-0.3 EV) and recover shadows in post."
-            composition = "Shoot into open shade or wait for clouds. If shooting in sun, use hard shadows as a design element."
-            equipment = "A lens hood is essential. Consider an ND filter to allow wider apertures in very bright conditions."
-            lightDesc = "High contrast, harsh shadows. Best for architecture and abstract texture."
+            switch weather.dayPhase {
+            case .earlyMorning:
+                settings = CameraSettings(
+                    iso: "ISO 100",
+                    aperture: "f/4.0",
+                    shutterSpeed: "1/320s",
+                    whiteBalance: "Shade (5500K)",
+                    exposureCompensation: "0 EV",
+                    focusMode: "Single AF (S-AF)",
+                    shootingMode: "Aperture Priority (A)",
+                    isoNote: "Base ISO",
+                    apertureNote: "Soft depth",
+                    shutterNote: "Crisp handheld"
+                )
+                technical = "Early morning sun sits low and warm, casting long, directional shadows — far more flattering than midday. f/4 balances subject separation with background context. White Balance set to Shade (~5500K) prevents AWB from neutralising the warm golden cast."
+                composition = "Position subjects with the low sun raking from the side to emphasise texture and dimension. The long shadow is part of the composition."
+                equipment = "A polarising filter will deepen the already-rich blue sky. Clean front element — dew may have settled overnight."
+                lightDesc = "Low warm sun at ~\(weather.temperatureKelvin)K — texture and shadow are your creative tools."
+
+            case .lateAfternoon:
+                settings = CameraSettings(
+                    iso: "ISO 100",
+                    aperture: "f/4.0",
+                    shutterSpeed: "1/320s",
+                    whiteBalance: "Cloudy (5000K)",
+                    exposureCompensation: "0 EV",
+                    focusMode: "Single AF (S-AF)",
+                    shootingMode: "Aperture Priority (A)",
+                    isoNote: "Base ISO",
+                    apertureNote: "Warm depth",
+                    shutterNote: "Crisp handheld"
+                )
+                technical = "Late afternoon sun is descending and warming — the scene glows at ~\(weather.temperatureKelvin)K. Set WB to Cloudy to preserve that warmth rather than letting AWB cool it. Golden hour is approaching: stay out and watch the light transform."
+                composition = "Long shadows are back. Shoot perpendicular to the sun for dramatic side-light on faces and textures."
+                equipment = "Keep an eye on the histogram — warm low sun often blows the red channel. Dial -0.3 EV if highlights clip."
+                lightDesc = "Warming afternoon light transitioning toward golden hour (~\(weather.temperatureKelvin)K)."
+
+            case .morning:
+                settings = CameraSettings(
+                    iso: "ISO 100",
+                    aperture: "f/5.6",
+                    shutterSpeed: "1/640s",
+                    whiteBalance: "Daylight (4800K)",
+                    exposureCompensation: "0 EV",
+                    focusMode: "Single AF (S-AF)",
+                    shootingMode: "Aperture Priority (A)",
+                    isoNote: "Base ISO",
+                    apertureNote: "Sharp & deep",
+                    shutterNote: "Freeze motion"
+                )
+                technical = "Morning sun is clean and slightly warm at ~\(weather.temperatureKelvin)K — one of the best times to shoot. f/5.6 gives excellent sharpness across the Stylus 1s's fixed lens. Daylight WB at 4800K keeps colours accurate without AWB drift."
+                composition = "Shoot landscapes: the sun is at a favourable angle that reveals terrain relief and adds a gentle warmth to greens and blues."
+                equipment = "Use the lens hood to prevent early-morning sun from causing flare when shooting toward the light."
+                lightDesc = "Clean warm morning light at ~\(weather.temperatureKelvin)K. Excellent shooting window."
+
+            case .afternoon:
+                settings = CameraSettings(
+                    iso: "ISO 100",
+                    aperture: "f/5.6",
+                    shutterSpeed: "1/640s",
+                    whiteBalance: "Daylight (4800K)",
+                    exposureCompensation: "0 EV",
+                    focusMode: "Single AF (S-AF)",
+                    shootingMode: "Aperture Priority (A)",
+                    isoNote: "Base ISO",
+                    apertureNote: "Sharp & deep",
+                    shutterNote: "Freeze motion"
+                )
+                technical = "Afternoon sun mirrors morning — clean, neutral light at ~\(weather.temperatureKelvin)K. Slightly past overhead, it adds modest dimensionality. f/5.6 keeps the frame sharp corner to corner on the Stylus 1s."
+                composition = "Architecture and street photography: the sun angle adds subtle shadow definition to facades and surfaces."
+                equipment = "Afternoon is a great time to review morning shots on-screen and note any exposure compensation adjustments for the coming golden hour."
+                lightDesc = "Neutral afternoon light at ~\(weather.temperatureKelvin)K. Golden hour ahead."
+
+            default: // .solarNoon and fallback
+                settings = CameraSettings(
+                    iso: "ISO 100",
+                    aperture: "f/8.0",
+                    shutterSpeed: "1/1000s",
+                    whiteBalance: "Daylight (5500K)",
+                    exposureCompensation: "-0.3 EV",
+                    focusMode: "Single AF (S-AF)",
+                    shootingMode: "Shutter Priority (S)",
+                    isoNote: "Base ISO",
+                    apertureNote: "Deep depth",
+                    shutterNote: "Freeze fast motion"
+                )
+                technical = "Midday sun is overhead and harsh at ~\(weather.temperatureKelvin)K — hard shadows fall directly below subjects. f/8 gives deep depth-of-field; expose for highlights (-0.3 EV) and recover shadows in post. Avoid portraits in direct sun — move to open shade."
+                composition = "Shoot into open shade or use hard shadows as a graphic design element in abstract and architectural images."
+                equipment = "A lens hood is essential. Consider an ND filter to allow wider apertures for motion blur in bright conditions."
+                lightDesc = "Harsh overhead sun at \(weather.temperatureKelvin)K. Best for architecture and abstract texture."
+            }
 
         case .cloudy:
             settings = CameraSettings(
