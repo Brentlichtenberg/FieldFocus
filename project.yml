@@ -35,6 +35,11 @@ targets:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: "FieldFocus uses your location to fetch real-time weather and lighting conditions for photography advice."
         NSLocationAlwaysAndWhenInUseUsageDescription: "FieldFocus uses your location to fetch real-time weather and lighting conditions for photography advice."
+        NSAppTransportSecurity:
+          NSExceptionDomains:
+            192.168.1.9:
+              NSExceptionAllowsInsecureHTTPLoads: true
+              NSIncludesSubdomains: false
     settings:
       base:
         CODE_SIGN_STYLE: Automatic

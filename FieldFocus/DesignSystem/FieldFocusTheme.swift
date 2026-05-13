@@ -6,8 +6,8 @@ enum FieldFocusTheme {
     // MARK: - Colors
     enum Color {
         /// Primary navy used for headers, navigation, structural elements.
-        static let navyDark    = SwiftUI.Color(hex: "#0A192F")
-        static let navyMid     = SwiftUI.Color(hex: "#0D1C32")
+        static let navyDark    = SwiftUI.Color(hex: "#1A3A5E")
+        static let navyMid     = SwiftUI.Color(hex: "#1D3D62")
         static let navyText    = SwiftUI.Color(hex: "#181C1E")
 
         /// Orange — the "action" color, CTAs, interactive elements.

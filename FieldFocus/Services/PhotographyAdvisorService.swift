@@ -14,7 +14,7 @@ final class PhotographyAdvisorService: ObservableObject {
     struct ChatMessage: Identifiable {
         let id = UUID()
         let role: Role
-        let text: String
+        var text: String
         enum Role { case user, assistant }
     }
 
@@ -23,15 +23,88 @@ final class PhotographyAdvisorService: ObservableObject {
         advice = Self.buildAdvice(weather: weather)
     }
 
+    // MARK: - Indoor advice (weather-independent)
+    static let indoorAdvice: ShootingAdvice = {
+        let settings = CameraSettings(
+            iso: "ISO 800",
+            aperture: "f/2.8",
+            shutterSpeed: "1/60s",
+            whiteBalance: "Auto (AWB)",
+            exposureCompensation: "+0.7 EV",
+            focusMode: "Single AF (S-AF)",
+            shootingMode: "Aperture Priority (A)",
+            isoNote: "Low-light balance",
+            apertureNote: "Max light intake",
+            shutterNote: "Hand-hold limit"
+        )
+        return ShootingAdvice(
+            settings: settings,
+            technicalAnalysis: "Indoor light is typically dim and warm. At f/2.8 the Stylus 1s gathers maximum light while creating pleasing subject separation. ISO 800 keeps noise manageable. Bump +0.7 EV — meters bias toward underexposure in dark rooms. Use Auto WB or Tungsten (3200K) if the light source is incandescent.",
+            compositionTip: "Seek natural window light and position your subject with it coming from one side — this gives flattering directionality without any equipment. Shoot parallel to the window for a soft Rembrandt-style shadow.",
+            equipmentTip: "The Stylus 1s built-in flash fires harsh light straight on. Reduce it via Menu → Shooting Menu 2 → Flash Intensity to -1.0 or -2.0 EV, or bounce off a white ceiling card for softer fill.",
+            lightQualityDescription: "Indoor mode active — weather & golden hour advice suppressed.",
+            lightWindowSeconds: nil
+        )
+    }()
+
     func sendMessage(_ text: String, weather: WeatherSnapshot) async {
         chatMessages.append(ChatMessage(role: .user, text: text))
+
+        // Seed an empty assistant message — tokens will stream in live
+        chatMessages.append(ChatMessage(role: .assistant, text: ""))
+        let idx = chatMessages.count - 1
         isThinking = true
-        defer { isThinking = false }
-        // Simulate an AI response based on keyword matching + weather context
-        let response = await Task.detached(priority: .userInitiated) {
-            Self.generateChatResponse(userInput: text, weather: weather)
-        }.value
-        chatMessages.append(ChatMessage(role: .assistant, text: response))
+
+        // Build conversation history for the LLM (last 10 turns + system prompt)
+        var messages: [LLMService.Message] = [
+            .init(role: "system", content: Self.buildSystemPrompt(weather: weather))
+        ]
+        for msg in chatMessages.dropLast() {       // exclude the empty assistant placeholder
+            messages.append(.init(role: msg.role == .user ? "user" : "assistant", content: msg.text))
+        }
+
+        do {
+            isThinking = false
+            try await LLMService.streamChat(messages: messages) { [weak self] token in
+                guard let self else { return }
+                self.chatMessages[idx].text += token
+            }
+        } catch {
+            logger.error("LLM stream failed: \(error.localizedDescription) — using keyword fallback")
+            isThinking = false
+            chatMessages[idx].text = Self.generateChatResponse(userInput: text, weather: weather)
+        }
+    }
+
+    // MARK: - System prompt
+
+    private static func buildSystemPrompt(weather: WeatherSnapshot) -> String {
+        """
+        You are FieldFocus AI, an expert photography assistant built into a camera-guidance app for the Olympus Stylus 1s compact camera. \
+        You give concise, practical advice tailored specifically to the Stylus 1s hardware and its menus.
+
+        Current shooting conditions:
+        - Location: \(weather.locationName)
+        - Light condition: \(weather.condition.rawValue)
+        - Colour temperature: ~\(weather.temperatureKelvin)K
+        - Wind: \(String(format: "%.0f", weather.windSpeedMPH)) mph \(weather.windDirectionCardinal)
+
+        Olympus Stylus 1s key specs to keep in mind:
+        - 1/1.7\" BSI-CMOS sensor, 12 MP
+        - Fixed 10.7× zoom lens: f/2.8 at 28mm to f/5.9 at 300mm equivalent
+        - ISO 100–6400 (auto up to 12800)
+        - 5-axis in-body image stabilisation (up to 4 stops)
+        - Shooting modes: P, A, S, M, iAuto, Art Filters, SCN, Panorama, Movie
+        - Max shutter: 1/2000s mechanical; flash sync 1/250s
+        - NOT weather-sealed — protect from rain and dust
+        - Menu access: OK button → Super Control Panel; or MENU for full menu tree
+        - White balance adjustment: MENU → Shooting Menu 1 → WB
+        - Fn1/Fn2 buttons are user-assignable
+
+        Keep responses short (2–4 sentences), camera-specific, and immediately actionable. \
+        Where relevant, include the exact Stylus 1s menu path or button to use. \
+        Never recommend equipment the Stylus 1s doesn't support.
+        """
     }
 
     // MARK: - Advice generation (Stylus 1s knowledge base)
