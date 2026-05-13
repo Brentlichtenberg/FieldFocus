@@ -6,9 +6,6 @@ struct ShootingAdviceView: View {
     @EnvironmentObject var advisorService: PhotographyAdvisorService
     @AppStorage("FieldFocus.isIndoorMode") private var isIndoorMode = false
 
-    @State private var now = Date()
-    private let clockTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
-
     private var activeAdvice: ShootingAdvice {
         isIndoorMode ? PhotographyAdvisorService.indoorAdvice : advisorService.advice
     }
@@ -45,7 +42,6 @@ struct ShootingAdviceView: View {
                 }
             }
             .navigationBarHidden(true)
-            .onReceive(clockTimer) { _ in now = Date() }
         }
     }
 
@@ -72,26 +68,15 @@ struct ShootingAdviceView: View {
                 .foregroundColor(FieldFocusTheme.Color.orange)
                 .font(.system(size: 13, weight: .semibold))
             } else {
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(formattedTime)
-                        .font(.system(size: 22, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white)
-                    Text(weatherService.snapshot.dayPhase.rawValue.uppercased())
-                        .font(FieldFocusTheme.Typography.labelCaps())
-                        .foregroundColor(.white.opacity(0.65))
-                        .kerning(0.8)
-                }
+                Image(systemName: weatherService.snapshot.condition.systemIcon)
+                    .font(.system(size: 28))
+                    .foregroundColor(FieldFocusTheme.Color.orange)
+                    .symbolRenderingMode(.hierarchical)
             }
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.md)
         .background(FieldFocusTheme.Color.navyDark)
-    }
-
-    private var formattedTime: String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "H:mm"
-        return fmt.string(from: now)
     }
 
     // MARK: - Indoor mode banner
