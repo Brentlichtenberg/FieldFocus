@@ -12,6 +12,7 @@
 		471136AC996AE011C02F1980 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E41BF3874B90D593533A759 /* Assets.xcassets */; };
 		495D4CC2813D98E068FC7878 /* PhotographyAdvisorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F62017D63D51D8C0B3CC1AF /* PhotographyAdvisorService.swift */; };
 		5592786306EC36D00F3551F2 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C8E58D73AB49E71F3808DB /* WeatherService.swift */; };
+		AA11223344556677AABBCCDE /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11223344556677AABBCCDD /* CameraModel.swift */; };
 		599A0373A4A5EB411EC2EE7B /* CameraSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9399EE71F99696266AC01A10 /* CameraSettings.swift */; };
 		7D4CC5C78A3DABD6EFD9C20E /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153B917AAEE9552F77EC9181 /* WelcomeView.swift */; };
 		8AA903F860CA686262F42661 /* ShootingAdviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225796A1B30B091385575851 /* ShootingAdviceView.swift */; };
@@ -37,6 +38,7 @@
 		6F62017D63D51D8C0B3CC1AF /* PhotographyAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotographyAdvisorService.swift; sourceTree = "<group>"; };
 		743E2B088C71BB30A8DF6FC5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		89EC43FF95335C8CD7ACB8A5 /* FieldFocusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldFocusApp.swift; sourceTree = "<group>"; };
+		AA11223344556677AABBCCDD /* CameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
 		9399EE71F99696266AC01A10 /* CameraSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSettings.swift; sourceTree = "<group>"; };
 		B40EAAD938C8B91FA28CD873 /* FieldFocusTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldFocusTheme.swift; sourceTree = "<group>"; };
 		C1A3E1F7F7E62ECFBBA3CF72 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				9399EE71F99696266AC01A10 /* CameraSettings.swift */,
+				AA11223344556677AABBCCDD /* CameraModel.swift */,
 				C1A3E1F7F7E62ECFBBA3CF72 /* WeatherCondition.swift */,
 			);
 			path = Models;
@@ -208,6 +211,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B78592B95E35F143ACC4D146 /* AIAssistantView.swift in Sources */,
+				AA11223344556677AABBCCDE /* CameraModel.swift in Sources */,
 				599A0373A4A5EB411EC2EE7B /* CameraSettings.swift in Sources */,
 				16720108D01F427861EAF03C /* ContentView.swift in Sources */,
 				D3DA32F21B2E7BA51AECBD1F /* FieldFocusApp.swift in Sources */,

@@ -1,7 +1,13 @@
 import SwiftUI
 
-/// Gear screen — Olympus Stylus 1s reference card with key specs.
+/// Gear screen — camera reference card driven by the user-selected Stylus Series model.
 struct GearView: View {
+    @AppStorage("FieldFocus.selectedCameraID") private var selectedCameraID: String = CameraModel.stylus1s.id
+
+    private var selectedModel: CameraModel {
+        CameraModel.stylusSeries.first { $0.id == selectedCameraID } ?? .stylus1s
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
@@ -36,14 +42,45 @@ struct GearView: View {
                     .font(FieldFocusTheme.Typography.labelCaps())
                     .foregroundColor(.white.opacity(0.7))
                     .kerning(1)
-                Text("Olympus Stylus 1s")
-                    .font(FieldFocusTheme.Typography.headlineSM())
-                    .foregroundColor(.white)
+                // Dropdown — tapping shows the Stylus Series picker
+                Menu {
+                    ForEach(CameraModel.stylusSeries) { model in
+                        Button {
+                            selectedCameraID = model.id
+                        } label: {
+                            if model.id == selectedCameraID {
+                                Label(model.displayName, systemImage: "checkmark")
+                            } else {
+                                Text(model.displayName)
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 5) {
+                        Text("Olympus \(selectedModel.displayName)")
+                            .font(FieldFocusTheme.Typography.headlineSM())
+                            .foregroundColor(.white)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.65))
+                    }
+                }
             }
             Spacer()
-            Image(systemName: "camera.fill")
-                .font(.system(size: 24))
+            // Get Manual — opens Olympus support page in Safari
+            Link(destination: selectedModel.supportURL) {
+                HStack(spacing: 4) {
+                    Image(systemName: "doc.text")
+                        .font(.system(size: 13))
+                    Text("MANUAL")
+                        .font(FieldFocusTheme.Typography.labelCaps())
+                        .kerning(0.6)
+                }
                 .foregroundColor(.white.opacity(0.85))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+            }
         }
         .padding(.horizontal, FieldFocusTheme.Spacing.pagePad)
         .padding(.vertical, FieldFocusTheme.Spacing.md)
@@ -76,9 +113,9 @@ struct GearView: View {
                     .glassChip(tint: .green, foreground: .white)
             }
 
-            ForEach(cameraSpecs, id: \.0) { spec in
-                specRow(label: spec.0, value: spec.1)
-                if spec.0 != cameraSpecs.last?.0 {
+            ForEach(selectedModel.specs, id: \.self) { spec in
+                specRow(label: spec.label, value: spec.value)
+                if spec != selectedModel.specs.last {
                     Divider().background(FieldFocusTheme.Color.outline)
                 }
             }
@@ -86,18 +123,6 @@ struct GearView: View {
         .padding(FieldFocusTheme.Spacing.md)
         .glassCard()
     }
-
-    private var cameraSpecs: [(String, String)] = [
-        ("SENSOR",   "1/1.7\" BSI CMOS, 12 MP"),
-        ("LENS",     "10.7× f/2.8–6.5, 28–300mm eq."),
-        ("ISO",      "100–6400 (extendable to 12800)"),
-        ("SHUTTER",  "1/2000s – 60s + Bulb"),
-        ("STAB.",    "Optical IS (3–4 stop)"),
-        ("AF",       "Phase / Contrast detect, 11 pts"),
-        ("VIDEO",    "1080p 60fps"),
-        ("BATTERY",  "BLS-5, ~280 shots"),
-        ("WEIGHT",   "402g incl. battery & card")
-    ]
 
     private func specRow(label: String, value: String) -> some View {
         HStack {
@@ -119,22 +144,22 @@ struct GearView: View {
     // MARK: - Quick reference card
     private var quickRefCard: some View {
         VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.sm) {
-            Text("QUICK REFERENCE — STYLUS 1S")
+            Text("QUICK REFERENCE — \(selectedModel.displayName.uppercased())")
                 .font(FieldFocusTheme.Typography.labelCaps())
                 .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 .kerning(0.8)
 
-            ForEach(quickRefs, id: \.0) { item in
+            ForEach(selectedModel.quickRefs, id: \.self) { item in
                 HStack(alignment: .top, spacing: FieldFocusTheme.Spacing.sm) {
-                    Image(systemName: item.2)
+                    Image(systemName: item.icon)
                         .font(.system(size: 14))
                         .foregroundColor(FieldFocusTheme.Color.orange)
                         .frame(width: 20)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.0)
+                        Text(item.title)
                             .font(FieldFocusTheme.Typography.bodySM().bold())
                             .foregroundColor(FieldFocusTheme.Color.textPrimary)
-                        Text(item.1)
+                        Text(item.detail)
                             .font(FieldFocusTheme.Typography.bodySM())
                             .foregroundColor(FieldFocusTheme.Color.textSecondary)
                             .lineSpacing(3)
@@ -146,39 +171,28 @@ struct GearView: View {
         .glassCard()
     }
 
-    private var quickRefs: [(String, String, String)] = [
-        ("Change ISO",         "Press Fn1 → rear dial, or OK → Super Control Panel → ISO",       "speedometer"),
-        ("Change Aperture",    "Switch to A mode, then rear dial",                                  "camera.aperture"),
-        ("Change Shutter",     "Switch to S or M mode, then rear dial",                             "timer"),
-        ("Set White Balance",  "Menu → Shooting 1 → WB, or Super Control Panel",                   "thermometer.medium"),
-        ("Manual Focus",       "Toggle MF on lens ring; zoom in with OK for MF Assist",             "viewfinder"),
-        ("Exposure Comp",      "+/- button then rear dial (P, A, S modes)",                         "plusminus"),
-        ("Enable Face AF",     "AF target selector → Face Priority (FP)",                           "face.dashed"),
-        ("Bracket Exposure",   "Drive mode dial → BKT, then set ±EV in menu",                       "square.stack"),
-    ]
-
     // MARK: - Mode guide card
     private var modeGuideCard: some View {
         VStack(alignment: .leading, spacing: FieldFocusTheme.Spacing.sm) {
-            Text("MODE DIAL GUIDE")
+            Text("MODE GUIDE")
                 .font(FieldFocusTheme.Typography.labelCaps())
                 .foregroundColor(FieldFocusTheme.Color.textSecondary)
                 .kerning(0.8)
 
-            ForEach(modeGuide, id: \.0) { mode in
+            ForEach(selectedModel.modeGuide, id: \.self) { entry in
                 HStack(alignment: .top, spacing: FieldFocusTheme.Spacing.sm) {
-                    Text(mode.0)
+                    Text(entry.mode)
                         .font(FieldFocusTheme.Typography.dataMono())
                         .foregroundColor(FieldFocusTheme.Color.orange)
                         .frame(width: 36, alignment: .leading)
-                    Text(mode.1)
+                    Text(entry.description)
                         .font(FieldFocusTheme.Typography.bodySM())
                         .foregroundColor(FieldFocusTheme.Color.textPrimary)
                         .lineSpacing(3)
                     Spacer()
                 }
                 .padding(.vertical, 4)
-                if mode.0 != modeGuide.last?.0 {
+                if entry != selectedModel.modeGuide.last {
                     Divider().background(FieldFocusTheme.Color.outline)
                 }
             }
@@ -186,15 +200,6 @@ struct GearView: View {
         .padding(FieldFocusTheme.Spacing.md)
         .glassCard()
     }
-
-    private var modeGuide: [(String, String)] = [
-        ("P",    "Program — camera picks aperture + shutter. Great starting point."),
-        ("A",    "Aperture Priority — you set aperture, camera picks shutter. Best for depth-of-field control."),
-        ("S",    "Shutter Priority — you set shutter speed, camera picks aperture. Best for motion control."),
-        ("M",    "Manual — full control. Required for long exposures and night work."),
-        ("ART",  "Art Filters — creative in-camera effects (Pop Art, Grainy Film, etc.)"),
-        ("SCN",  "Scene Mode — pre-set combinations for common situations."),
-    ]
 }
 
 #Preview {
